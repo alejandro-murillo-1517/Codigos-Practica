@@ -1,0 +1,66 @@
+# Librerias
+import os as os
+from time import sleep
+import psutil 
+import time
+import smtplib
+
+print("======================================================================")
+
+
+cpu = psutil.cpu_percent (1) # tasa de uso de CPU en un segundo, unidad
+#cpu_per = "% .2f %%"% cpu # Da el cpu en porcentaje
+# Llamar a la memoria ram
+ram = psutil.virtual_memory()[2]
+
+
+# Llamar al disco 
+disk_usage = psutil.disk_usage("/")
+
+# definir y convertir los bytes en gb 
+def to_gb(bytes):
+    "Convierte bytes a gigabytes."
+    return bytes / 1024**3
+
+# Mostrar el espacio total, libre y el porcentaje del espacio usado(Esto no se envia al correo) 
+print("Espacio total: {:.2f} GB.".format(to_gb(disk_usage.total)))
+print("Espacio libre: {:.2f} GB.".format(to_gb(disk_usage.free)))
+print("Espacio usado: {:.2f} GB.".format(to_gb(disk_usage.used)))
+print("Porcentaje de espacio usado: {}%.".format(disk_usage.percent))
+     
+
+
+
+print("======================================================================")
+# Disco usado
+if disk_usage.percent <=80.0:  
+    print (f"El espacio del disco esta bien es del: {disk_usage.percent}%")  
+else:
+     
+    print (f"Porcentaje de espacio usado es del: {disk_usage.percent}%")                                 #Destinatario  
+    print (os.system(f'echo "Se ha usado el: {disk_usage.percent}% del disco " |  mutt -s "ALERTA DISCO" alejandro.murillo1517@gmail.com'))
+    print ("ALERTA ENVIADA")
+
+
+print("======================================================================")
+
+
+# Memoria ram
+if ram >= 90.0:
+    print (f"La memoria ram esta bien es del: {ram}%")
+else:    
+    print (f"La memoria ram esta alta, es del: {ram} % ")                      #Destinatario 
+    print (os.system(f'echo "La RAM es del: {ram}%  " |  mutt -s "ALERTA RAM " alejandro.murillo1517@gmail.com'))  	    
+    print ("ALERTA ENVIADA")
+print("======================================================================")
+#CPU
+if cpu <= 20.0:
+    print (f"La CPU esta bien es del: {cpu}%")
+else:    
+    print (f"La cpu esta alta, es del: {cpu}% ")                             #Destinatario 
+    print (os.system(f'echo "La CPU es del: {cpu}% " |  mutt -s "ALERTA CPU" alejandro.murillo1517@gmail.com'))
+    print ("ALERTA ENVIADA")
+
+ 
+      
+print("======================================================================")

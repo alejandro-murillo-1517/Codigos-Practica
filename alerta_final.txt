@@ -1,0 +1,113 @@
+# Librerias
+import os as os
+import speedtest
+from time import sleep
+from tqdm import tqdm
+from colorama import Fore, init
+import psutil 
+import time
+
+salida ="<!DOCTYPE HTML PUBLIC-//W3C//DTD HTML 4.01 Transitional//EN http://www.w3.org/TR/html4/loose.dtd><html><body>"
+
+
+# Velocidad de internet
+#Internet
+init(autoreset=True)
+
+print(Fore.GREEN + "OBTENIENDO LOS DATOS DEL SERVIDOR, VELOCIDAD DE CARGA Y DESCARGA.....")
+
+# Para llamar al speedtest
+st = speedtest.Speedtest()
+
+st.download()  # Velocidad de descarga
+for i in tqdm(range(10), colour="cyan", desc="Obteniendo la velocidad de descarga"):
+    sleep(0.05)
+
+st.upload()  # Velocidad de carga
+for i in tqdm(range(10), colour="red", desc="Obteniendo la velocidad carga"):
+    sleep(0.05)
+
+# Guarda todos los elementos en un diccionario
+res_dict = st.results.dict()
+
+# Asignar a variables con un formato especifico
+dwnl = str(res_dict['download'])[:2] + "." + \
+    str(res_dict['download'])[2:4]
+
+upl = str(res_dict['upload'])[:2] + "." + str(res_dict['upload'])[2:4]
+
+# Para que se vea mas ordenado
+salida+="<h3></h3>"
+
+# Para dividir - una linea en la pantalla con un ancho fijo
+print(Fore.MAGENTA + "="*80)
+salida+=(Fore.GREEN + "RESULTADOS DE LAS PRUEBAS DE VELOCIDAD DE INTERNET :".center(80))
+print(Fore.MAGENTA + "="*80)
+salida+=(Fore.YELLOW +
+      f"Descarga: {dwnl}mbps({float(dwnl)*0.125:.2f}MBs) | Carga:{upl}mbps ({float(upl)*0.125:.2f}MBs)")
+salida+=(Fore.MAGENTA + "-"*80)
+salida+=(Fore.CYAN +
+      f"Latencia: {res_dict['server']['latency']:.2f}".center(80))
+salida+=(Fore.MAGENTA + "-"*80)
+
+#Obteniendo la fecha y la hora actual
+Fecha = time.strftime("%d/%m/%y ")
+Hora  = time.strftime("%H:%M:%S ")
+salida+= (Fecha + " " + Hora)
+
+
+
+
+cpu = psutil.cpu_percent (1) # tasa de uso de CPU en un segundo, unidad
+# Llamar a la memoria ram
+ram = psutil.virtual_memory()[2]
+
+
+# Llamar al disco 
+disk_usage = psutil.disk_usage("/")
+
+# definir y convertir los bytes en gb 
+def to_gb(bytes):
+    "Convierte bytes a gigabytes."
+    return bytes / 1024**3
+
+# Mostrar el espacio total, libre y el porcentaje del espacio usado(Esto no se envia al correo) 
+salida+=("<h3>Espacio total: {:.2f} GB.</h3>".format(to_gb(disk_usage.total)))
+salida+=("<h3>Espacio libre: {:.2f} GB.</h3>".format(to_gb(disk_usage.free)))
+salida+=("<h3>Espacio usado: {:.2f} GB.</h3>".format(to_gb(disk_usage.used)))
+salida+=("<h3>Porcentaje de espacio usado: {}%.</h3>".format(disk_usage.percent))
+     
+
+
+
+# Disco usado
+if disk_usage.percent <=80.0:  
+    print (f"El espacio del disco esta bien es del: {disk_usage.percent}%")  
+else:
+     
+    salida+= (f"<h1>Peligro se ha usado el: {disk_usage.percent}% del disco<h1> ")  
+    # Enviar correo                                                                                                   
+    print(os.system(f'echo "{salida}" > htmlfile.html '))     # Destinatario 
+    print(os.system(f'mutt -e "set content_type= text/html" correo@destinatario.com -s "ALERTA DISCO" < htmlfile.html'))
+	
+
+
+# Memoria ram
+if ram >= 90.0:
+    print (f"El uso de la  memoria RAM esta bien es del: {ram}%")
+else:    
+    salida+= f"<h1>El uso de memoria RAM es alto, es del: {ram} % </h1>"
+    # Enviar correo                                                           
+    print(os.system(f'echo "{salida}" > htmlfile.html '))     # Destinatario 
+    print(os.system(f'mutt -e "set content_type= text/html" correo@destinatario.com -s "Alerta Ram" < htmlfile.html'))
+
+    
+
+#CPU
+if cpu <= 20.0:
+    print (f"El uso del  CPU esta bien es del: {cpu}%")
+else:    
+    salida+= f"<h1>El uso del CPU es alto, es del: {cpu}%</h1> "   
+    # Enviar correo
+    print(os.system(f'echo "{salida}" > htmlfile.html '))      # Destinatario   
+    print(os.system(f'mutt -e "set content_type= text/html" correo@destinatario.com -s "ALERTA CPU" < htmlfile.html'))

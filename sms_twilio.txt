@@ -1,0 +1,93 @@
+# Download the helper library from https://www.twilio.com/docs/python/instal
+from msilib.schema import Error
+from twilio.rest import Client
+import psutil 
+
+# Find your Account SID and Auth Token at twilio.com/console
+# and set the environment variables. See http://twil.io/secure
+
+# Llamar a la memoria RAM
+ram = psutil.virtual_memory()[2]
+# Llamar a la CPU
+cpu = psutil.cpu_percent (1)
+
+# Llamar al disco 
+disk_usage = psutil.disk_usage("/")
+
+# definir y convertir los bytes en gb 
+def to_gb(bytes):
+    "Convierte bytes a gigabytes."
+    return bytes / 1024**3
+print("======================================================")   
+# Mostrar el espacio total, libre y el porcentaje del espacio usado(Esto no se envia al correo) 
+print("Espacio total: {:.2f} GB.".format(to_gb(disk_usage.total)))
+print("Espacio libre: {:.2f} GB.".format(to_gb(disk_usage.free)))
+print("Espacio usado: {:.2f} GB.".format(to_gb(disk_usage.used)))
+print("Porcentaje de espacio usado: {}%.".format(disk_usage.percent))    
+
+print("======================================================")   
+# Cuenta de twilio
+account_sid ='SID DE LA CUENTA'
+auth_token = 'CODIGO DE AUTENTICACIÓN'
+# Crear cliente en base a lo anterior
+client = Client(account_sid, auth_token)
+
+# Condicion memoria ram
+if ram >= 90.0:
+    print ("Enviando mensaje")
+    # Mensaje
+    message = client.messages \
+                .create(
+                    # Cuerpo del mensaje 
+                     body=f"Peligro la memoria ram es de {ram}, esta alta",
+                     # Telefono gratuito registrado
+                     from_='NUMERO TWILIO',
+                     # Telefono al cual se le enviara el mensaje
+                     to='TELEFONO PERSONAL O AL CUAL SE LE ENVIARA EL SMS'
+                 )
+else:
+    print("la memoria ram esta bien")  
+
+    print("======================================================")                   
+
+    if cpu >= 20.0:
+        print ("Enviando mensaje")
+        # Mensaje
+        message = client.messages \
+                .create(
+                    # Cuerpo del mensaje 
+                     body=f"Peligro la cpu es de {cpu}%, esta alta",
+                     # Telefono gratuito registrado
+                     from_='',
+                     # Telefono al cual se le enviara el mensaje
+                     to=''
+                 )
+    else:
+        print("El uso de la CPU esta bien") 
+
+    print("======================================================")   
+
+    if disk_usage.percent >= 80.0:
+        print ("Enviando mensaje")
+    # Mensaje
+        message = client.messages \
+                .create(
+                    # Cuerpo del mensaje 
+                     body=f"Peligro el disco a usado es del {disk_usage.percent}%, esta alto",
+                     # Telefono gratuito registrado
+                     from_='',
+                     # Telefono al cual se le enviara el mensaje
+                     to=''
+                 )
+    else:
+        print("El disco esta fuera de peligro")
+
+    print("======================================================")   
+
+# Imprimir el idetificador de mensaje
+try:
+    print(message.sid)
+    # Mensaje de finalizacion
+    print("Mensaje enviado")
+except NameError:
+    print("Todo ok")

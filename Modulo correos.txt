@@ -1,0 +1,14 @@
+# Declaro el correo y contraseña
+Emisor      = "Correo del cual se emite la alerta"
+Receptor    = "Correo del o los destinatarios de la Alerta "
+Contraseña  = "Contraseña Emisor"
+
+
+emisor      = "Correo del cual se emite la alerta"
+receptor    = "Correo del o los destinatarios de la Alerta"
+contraseña  = "Contraseña Emisor"
+
+
+De     = "Correo del cual se emite la alerta"
+Para    = "Correo del o los destinatarios de la Alerta"
+password  = "Contraseña Emisor"

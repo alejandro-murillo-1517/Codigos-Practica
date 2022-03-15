@@ -1,0 +1,111 @@
+import os as os
+import smtplib, email
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import Encoders
+import re
+import subprocess
+import numpy as np
+# Host
+HostName = subprocess.check_output("hostname", shell=True)
+
+# IP
+cmd_ipaddress = "/sbin/ifconfig | grep 'inet' | grep broadcast | awk '{print $2}'"
+IPaddress= subprocess.check_output(cmd_ipaddress, shell=True) 
+
+#IPaddress= IPaddress[5:-1]
+
+print 'IP: ' + IPaddress 
+print '======================='
+# Disk
+cmd_disksize = "df /home -BG  | awk '{print $2}'"
+cmd_used     = "df /home -BG  | awk '{print $3}'"
+cmd_free     = "df /home -BG  | awk '{print $4}'"
+cmd_percent  = "df /home -BG  | awk '{print $5}'"
+cmd_mountedon= "df /home -BG  | awk '{print $1}'"
+
+#print cmd_disksize
+
+disksize = subprocess.check_output(cmd_disksize, shell=True);
+
+#print disksize
+disksize = int(disksize[10:-2])
+#print disksize
+print 'Disk size: ' + str(disksize)   + ' GB'
+
+print '======================='
+
+used     = subprocess.check_output(cmd_used, shell=True);
+used     = int(used[5:-2])
+#print used
+print 'Disk used: ' + str(used)   + ' GB'
+
+print '======================='
+free     = subprocess.check_output(cmd_free, shell=True);
+free     = int(free[10:-2])
+#print free
+print 'Disk free: ' + str(free)   + ' GB'
+
+print '======================='
+percent  = subprocess.check_output(cmd_percent, shell=True);
+percent  = percent[5:-1]
+print 'Percent Used: ' + percent
+
+print '======================='
+mountedon= subprocess.check_output(cmd_mountedon, shell=True)
+mountedon= mountedon[11:-1]
+print 'Mount point :' + mountedon
+
+
+
+low_disk = 500; #
+
+# Mail if disk is low
+if free < low_disk:
+  print "Sending Mail"
+  to_list_test = ["osvaldo.artal@ifop.cl","milton.salas@ifop.cl","oliver.venegas@ifop.cl","cristian.ruiz@ifop.cl"]
+  # Message data
+  Sender  = "mosa.ifop@gmail.com"
+  Subject = "Bajo espacio de disco en " + HostName
+  # Create message container
+  msg = MIMEMultipart('alternative')
+  msg['Subject'] = Subject
+  msg["From"]    = Sender
+  msg["To"]      = ", ".join(to_list_test)
+  # Plain text content
+  html = """
+  <!DOCTYPE html>
+  <html>
+  <body>
+
+  <h4>Estado """ + HostName + """(""" + IPaddress + """):</h4>
+  <table border="1">
+  <tr>
+  <th>Punto de Montaje:</th>
+  <td>""" + mountedon + """ </td>
+  </tr>
+  <tr>
+  <th>Capacidad de disco:</th>
+  <td>""" + str(disksize) + """GB </td>
+  </tr>
+  <tr>
+  <th>Espacio Utilizado:</th>
+  <td>""" + str(used) + """GB (""" + percent +  """) </td>
+  </tr>
+  <tr>
+  <th>Espacio Disponible:</th>
+  <td>""" + str(free) + """GB </td>
+  </tr>
+  </table>
+  </body>
+  </html>
+  """
+  part1 = MIMEText(html, 'html')
+  msg.attach(part1)
+  #msg["To"]      = ', '.join( to_list_test )
+  s = smtplib.SMTP_SSL('smtp.gmail.com','465')
+  s.login(Sender,'mosa2019!')
+  s.sendmail(Sender,to_list_test,msg.as_string())
+  print "Mail sent"
+  s.quit()

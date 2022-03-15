@@ -1,0 +1,42 @@
+import speedtest
+from time import sleep
+from tqdm import tqdm
+from colorama import Fore, init
+
+init(autoreset=True)
+
+print(Fore.GREEN + "OBTENIENDO LOS DATOS DEL SERVIDOR, VELOCIDAD DE CARGA Y DESCARGA.....")
+
+# Para llamar al speedtest
+st = speedtest.Speedtest()
+
+st.download()  # Velocidad de descarga
+for i in tqdm(range(10), colour="cyan", desc="Obteniendo la velocidad de descarga"):
+    sleep(0.05)
+
+st.upload()  # Velocidad de carga
+for i in tqdm(range(10), colour="red", desc="Obteniendo la velocidad carga"):
+    sleep(0.05)
+
+# Guarda todos los elementos en un diccionario
+res_dict = st.results.dict()
+
+# Asignar a variables con un formato específico
+dwnl = str(res_dict['download'])[:2] + "." + \
+    str(res_dict['download'])[2:4]
+
+upl = str(res_dict['upload'])[:2] + "." + str(res_dict['upload'])[2:4]
+
+# Para que se vea mas ordenado
+print("")
+
+# Para dividir - una línea en la pantalla con un ancho fijo
+print(Fore.MAGENTA + "="*80)
+print(Fore.GREEN + "RESULTADOS DE LAS PRUEBAS DE VELOCIDAD DE INTERNET :".center(80))
+print(Fore.MAGENTA + "="*80)
+print(Fore.YELLOW +
+      f"Descarga: {dwnl}mbps({float(dwnl)*0.125:.2f}MBs) | Carga:{upl}mbps ({float(upl)*0.125:.2f}MBs)")
+print(Fore.MAGENTA + "-"*80)
+print(Fore.CYAN +
+      f"Latencia: {res_dict['server']['latency']:.2f}".center(80))
+print(Fore.MAGENTA + "-"*80)

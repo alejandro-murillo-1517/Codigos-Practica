@@ -1,0 +1,114 @@
+# Librerias
+from logging import exception
+import psutil 
+import time
+import smtplib
+# Importar modulos
+from email.mime.text import MIMEText
+
+cpu = psutil.cpu_percent (1) # tasa de uso de CPU en un segundo, unidad
+#cpu_per = "% .2f %%"% cpu # Da el cpu en porcentaje
+# Llamar a la memoria ram
+ram = psutil.virtual_memory()[2]
+
+# Llamar al disco 
+disk_usage = psutil.disk_usage("/")
+
+# definir y convertir los bytes en gb 
+def to_gb(bytes):
+    "Convierte bytes a gigabytes."
+    return bytes / 1024**3
+
+# Mostrar el espacio total, libre y el porcentaje del espacio usado(Esto no se envia al correo) 
+print("Espacio total: {:.2f} GB.".format(to_gb(disk_usage.total)))
+print("Espacio libre: {:.2f} GB.".format(to_gb(disk_usage.free)))
+print("Espacio usado: {:.2f} GB.".format(to_gb(disk_usage.used)))
+print("Porcentaje de espacio usado: {}%.".format(disk_usage.percent))
+     
+
+#Obteniendo la fecha y la hora actual
+Fecha = time.strftime("%d/%m/%y ")
+Hora  = time.strftime("%H:%M:%S ")
+print(Fecha + " " + Hora)
+
+
+# Disco usado
+if disk_usage.percent <=80.0:  
+    print   
+else:
+    print("Preparando mensaje") 
+    emisor= [""]
+    # Mensaje
+    emisor = ""
+    subject = f"Porcentaje de espacio usado es del: {disk_usage.percent}%"  
+    # Contenido del mensaje
+    mensaje = MIMEText('alerta')
+    mensaje['Subject'] = subject
+    mensaje["From"]    = emisor
+    mensaje["To"]      = ", ".join(emisor)
+
+
+
+# Memoria ram
+if ram <= 90.0:
+    print
+else:    
+    Emisor= [""]
+    # Mensaje
+    Emisor = ""
+    Subject = f"La memoria ram esta alta, es del: {ram} % " 
+    # Contenido del mensaje
+    Mensaje = MIMEText('alerta')
+    Mensaje['Subject'] = Subject
+    Mensaje["From"]    = Emisor
+    Mensaje["To"]      = ", ".join(Emisor)
+
+#CPU
+if cpu <= 20.0:
+    print
+else:    
+    De = [""]
+    # Mensaje
+    De = ""
+    Asunto = f"La cpu esta alta, es del: {cpu}% " 
+    # Contenido del mensaje
+    Ms = MIMEText('alerta')
+    Ms['Subject'] = Asunto
+    Ms["From"]    = De
+    Ms["To"]      = ", ".join(De)
+  
+# Importar modulo donde se encuentra el correo , contraseña y el receptor
+import correo
+
+#Preparando comunicacion
+mailServer = smtplib.SMTP('smtp.gmail.com', 587)
+mailServer.ehlo()
+mailServer.starttls()
+mailServer.login(correo.Emisor, correo.Contraseña)
+mailServer.login(correo.emisor, correo.contraseña)
+mailServer.login(correo.De, correo.password)
+
+# Enviar el correo
+try:    
+    mailServer.sendmail(correo.Emisor, correo.Receptor, Mensaje.as_string())
+    print("Mensaje Enviado")
+except NameError:
+    print("No se ha enviado el mensaje porque la ram no esta alta") 
+
+# Enviar el correo
+try:    
+    mailServer.sendmail(correo.emisor, correo.receptor, mensaje.as_string())
+    print("Mensaje Enviado")
+except NameError:
+    print("No se ha enviado el mensaje porque el disco esta bien") 
+
+
+# Enviar el correo
+try:    
+    mailServer.sendmail(correo.De, correo.Para, Ms.as_string())
+    print("Mensaje Enviado")
+except NameError:
+    print("No se ha enviado el mensaje porque el cpu esta bien")    
+
+
+mailServer.close()
